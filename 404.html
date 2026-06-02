@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>STREETZ Ecuador</title>
+  <script>
+    // Redirige cualquier URL no encontrada al index con el hash correcto
+    const path = window.location.pathname;
+    const hash = path.includes('contact') ? '#contact'
+               : path.includes('resena') ? '#resenas'
+               : '#catalog';
+    window.location.replace('/' + hash);
+  </script>
+</head>
+<body></body>
+</html>

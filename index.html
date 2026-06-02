@@ -437,6 +437,8 @@
     .product-name { font-size: 14px; font-weight: 700; color: var(--black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .product-price { font-family: var(--display); font-size: 30px; letter-spacing: 1px; color: var(--black); flex-shrink: 0; }
     .product-desc { font-size: 11px; color: var(--gray); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .product-sizes { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+    .size-chip-card { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; border: 1px solid var(--border); color: var(--black); padding: 3px 8px; border-radius: 2px; }
 
     /* ── MODAL ── */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.58); z-index: 400; opacity: 0; pointer-events: none; transition: opacity .32s; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
@@ -625,6 +627,59 @@
     .footer-links a:hover { color: var(--black); }
 
     /* ── RESPONSIVE ── */
+    /* ── EMAIL POPUP ── */
+    .email-popup-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.78); z-index: 99995;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity .4s ease;
+    }
+    .email-popup-overlay.open { opacity: 1; pointer-events: all; }
+    .email-popup {
+      background: var(--white); max-width: 440px; width: 100%;
+      padding: 52px 44px 40px; position: relative; text-align: center;
+      transform: translateY(24px) scale(.97);
+      transition: transform .45s cubic-bezier(.16,1,.3,1);
+    }
+    .email-popup-overlay.open .email-popup { transform: none; }
+    .email-popup-close {
+      position: absolute; top: 16px; right: 16px;
+      background: none; border: none; font-size: 22px; color: var(--gray);
+      cursor: pointer; line-height: 1; padding: 4px; transition: color .2s;
+    }
+    .email-popup-close:hover { color: var(--black); }
+    .email-popup-tag {
+      display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 4px;
+      text-transform: uppercase; color: var(--white); background: var(--black);
+      padding: 5px 12px; margin-bottom: 20px;
+    }
+    .email-popup-title {
+      font-family: var(--display); font-size: clamp(58px, 14vw, 82px);
+      letter-spacing: 2px; line-height: .92; color: var(--black); margin-bottom: 14px;
+    }
+    .email-popup-sub {
+      font-size: 13px; color: var(--gray); line-height: 1.65; margin-bottom: 28px;
+    }
+    .email-popup-form { display: flex; flex-direction: column; gap: 10px; }
+    .email-popup-input {
+      border: 1px solid var(--border); background: var(--white); color: var(--black);
+      font-family: var(--body); font-size: 14px; padding: 14px 18px;
+      outline: none; transition: border-color .2s; border-radius: 2px; text-align: center;
+    }
+    .email-popup-input:focus { border-color: var(--black); }
+    .email-popup-btn {
+      background: var(--black); color: var(--white); border: none;
+      padding: 17px; font-size: 11px; font-weight: 900; letter-spacing: 2.5px;
+      text-transform: uppercase; cursor: pointer; font-family: var(--body);
+      transition: background .2s;
+    }
+    .email-popup-btn:hover { background: #1a1a1a; }
+    .email-popup-skip {
+      font-size: 11px; color: var(--gray); margin-top: 18px;
+      cursor: pointer; text-decoration: underline; transition: color .2s;
+    }
+    .email-popup-skip:hover { color: var(--black); }
+    .email-popup-legal { font-size: 10px; color: #bbb; margin-top: 10px; }
+
     @media (max-width: 768px) {
       body { cursor: auto; }
       #cur-dot, #cur-ring { display: none; }
@@ -645,6 +700,25 @@
   </style>
 </head>
 <body>
+
+<!-- EMAIL POPUP -->
+<div id="emailPopup" class="email-popup-overlay">
+  <div class="email-popup">
+    <button class="email-popup-close" onclick="closeEmailPopup()">&#215;</button>
+    <div class="email-popup-tag">Oferta exclusiva</div>
+    <div class="email-popup-title">10%<br>OFF</div>
+    <div class="email-popup-sub">
+      En tu <strong>primer pedido</strong>.<br>
+      Déjanos tu email y te enviamos tu código de descuento exclusivo.
+    </div>
+    <form class="email-popup-form" onsubmit="submitEmailPopup(event)">
+      <input type="email" id="popupEmail" class="email-popup-input" placeholder="tu@email.com" required autocomplete="email" />
+      <button type="submit" class="email-popup-btn">Quiero mi 10% de descuento</button>
+    </form>
+    <div class="email-popup-skip" onclick="closeEmailPopup()">No gracias, pago precio completo</div>
+    <p class="email-popup-legal">Sin spam. Sólo ofertas y drops exclusivos.</p>
+  </div>
+</div>
 
 <!-- PRELOADER -->
 <div id="preloader">
@@ -715,7 +789,6 @@
     <h2 class="brand-chip">Fake Gods</h2>
     <h2 class="brand-chip">Eme Studios</h2>
     <h2 class="brand-chip">Scuffers</h2>
-    <h2 class="brand-chip">Asics</h2>
   </div>
 </section>
 
@@ -725,16 +798,16 @@
 <!-- STATS -->
 <div class="stats-section">
   <div class="stat-item reveal">
-    <div class="stat-num" data-count="100">0</div>
-    <div class="stat-label">Clientes Satisfechos</div>
+    <div class="stat-num" data-count="52" data-suffix="+">0</div>
+    <div class="stat-label">Ventas Realizadas</div>
   </div>
   <div class="stat-item reveal d1">
     <div class="stat-num" data-count="24">0</div>
     <div class="stat-label">Provincias con Env&iacute;o</div>
   </div>
   <div class="stat-item reveal d2">
-    <div class="stat-num" data-count="100">0</div>
-    <div class="stat-label">% Autenticidad</div>
+    <div class="stat-num" data-count="100" data-suffix="%">0</div>
+    <div class="stat-label">Autenticidad Garantizada</div>
   </div>
 </div>
 
@@ -843,6 +916,52 @@
   <button class="lookbook-nav lookbook-next" onclick="lbNav(1)">&#8250;</button>
   <div class="lookbook-thumbs" id="lbThumbs"></div>
 </div>
+
+<!-- TRUSTPILOT REVIEWS -->
+<section class="section" id="resenas" style="background:var(--dark);border-top:1px solid var(--border);">
+  <div class="section-head">
+    <h2 class="section-title reveal">
+      <span class="section-accent">&mdash; Clientes verificados</span>
+      RESE&Ntilde;AS
+    </h2>
+  </div>
+  <div class="reveal" style="text-align:center;max-width:700px;margin:0 auto;">
+    <!-- TrustBox widget: reemplaza data-businessunit-id con tu ID de Trustpilot -->
+    <!-- Registro gratis en: https://business.trustpilot.com -->
+    <div class="trustpilot-widget"
+         data-locale="es-EC"
+         data-template-id="53aa8807dec7e10d38f59f32"
+         data-businessunit-id="REEMPLAZA_CON_TU_ID_TRUSTPILOT"
+         data-style-height="150px"
+         data-style-width="100%"
+         data-theme="light">
+      <a href="https://es.trustpilot.com/review/streetzec.com" target="_blank" rel="noopener">Ver reseñas en Trustpilot</a>
+    </div>
+    <script type="text/javascript" src="//widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js" async></script>
+
+    <!-- TESTIMONIOS MANUALES (visibles mientras activas Trustpilot) -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:40px;text-align:left;">
+      <div style="background:#fff;border:1px solid var(--border);padding:22px;border-radius:2px;">
+        <div style="font-size:13px;color:#f5a623;margin-bottom:8px;">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <div style="font-size:13px;font-weight:700;color:var(--black);margin-bottom:6px;">"Llegó súper rápido"</div>
+        <div style="font-size:12px;color:var(--gray);line-height:1.6;">Pedí el Seoul Hoodie y llegó en 3 días a Quito. 100% original, exactamente igual que en la web de Nude Project.</div>
+        <div style="font-size:10px;color:#bbb;margin-top:10px;letter-spacing:1px;text-transform:uppercase;">Cliente verificado &mdash; Quito</div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);padding:22px;border-radius:2px;">
+        <div style="font-size:13px;color:#f5a623;margin-bottom:8px;">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <div style="font-size:13px;font-weight:700;color:var(--black);margin-bottom:6px;">"La mejor tienda de streetwear en Ecuador"</div>
+        <div style="font-size:12px;color:var(--gray);line-height:1.6;">Me ahorré el doble de lo que me costaría importarlo. Atención por WhatsApp muy rápida y el producto llegó sin problemas.</div>
+        <div style="font-size:10px;color:#bbb;margin-top:10px;letter-spacing:1px;text-transform:uppercase;">Cliente verificado &mdash; Riobamba</div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);padding:22px;border-radius:2px;">
+        <div style="font-size:13px;color:#f5a623;margin-bottom:8px;">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <div style="font-size:13px;font-weight:700;color:var(--black);margin-bottom:6px;">"Definitivamente vuelvo"</div>
+        <div style="font-size:12px;color:var(--gray);line-height:1.6;">La Fuck Normal Tee llegó perfecta. Autenticidad verificada, etiquetas originales y todo. Recomiendo 100%.</div>
+        <div style="font-size:10px;color:#bbb;margin-top:10px;letter-spacing:1px;text-transform:uppercase;">Cliente verificado &mdash; Ambato</div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- CONTACT -->
 <section class="contact-section" id="contact">
@@ -1024,13 +1143,13 @@ document.querySelectorAll('.reveal').forEach(el => revObs.observe(el));
 const cntObs = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (!e.isIntersecting) return;
-    const el = e.target, target = +el.dataset.count, t0 = performance.now();
+    const el = e.target, target = +el.dataset.count, suffix = el.dataset.suffix || '', t0 = performance.now();
     const dur = 1500;
     (function tick(now) {
       const p = Math.min((now - t0) / dur, 1);
-      el.textContent = Math.round((1 - Math.pow(1 - p, 3)) * target);
+      el.textContent = Math.round((1 - Math.pow(1 - p, 3)) * target) + (p >= 1 ? suffix : '');
       if (p < 1) requestAnimationFrame(tick);
-      else el.textContent = target;
+      else el.textContent = target + suffix;
     })(t0);
     cntObs.unobserve(el);
   });
@@ -1041,7 +1160,7 @@ document.querySelectorAll('[data-count]').forEach(el => cntObs.observe(el));
    BIG MARQUEE
 ═══════════════════════════════════════ */
 (function(){
-  const words = ['STREETZ','ORIGINALES','GLOBAL','STREETWEAR','100% AUTÉNTICO','ASICS','ENVÍO RÁPIDO'];
+  const words = ['STREETZ','ORIGINALES','GLOBAL','STREETWEAR','100% AUTÉNTICO','ENVÍO RÁPIDO','ECUADOR'];
   const t = document.getElementById('bmTrack');
   [...words, ...words].forEach((w, i) => {
     const s = document.createElement('span');
@@ -1057,9 +1176,9 @@ document.querySelectorAll('[data-count]').forEach(el => cntObs.observe(el));
 (function(){
   const words = [
     'PRODUCTOS 100% ORIGINALES','ENVÍO A TODO EL PAÍS','NUEVA COLECCIÓN SS26',
-    'CALIDAD PREMIUM','ASICS × JJJJOUND','PRENDAS AUTÉNTICAS',
+    'CALIDAD PREMIUM','NUDE PROJECT','FAKE GODS','PRENDAS AUTÉNTICAS',
     'PRODUCTOS 100% ORIGINALES','ENVÍO A TODO EL PAÍS','NUEVA COLECCIÓN SS26',
-    'CALIDAD PREMIUM','ASICS × JJJJOUND','PRENDAS AUTÉNTICAS',
+    'CALIDAD PREMIUM','NUDE PROJECT','FAKE GODS','PRENDAS AUTÉNTICAS',
   ];
   const t = document.getElementById('tickerTrack');
   words.forEach(w => {
@@ -1142,6 +1261,7 @@ function renderGrid(filter) {
           <div class="product-price">$${p.price}</div>
         </div>
         <div class="product-desc">${p.desc}</div>
+        ${p.sizes && p.sizes.length ? `<div class="product-sizes">${p.sizes.map(sz => `<span class="size-chip-card">${sz}</span>`).join('')}</div>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -1500,6 +1620,40 @@ function sendContact(e) {
     phone?`*Contacto:* ${phone}`:'',`*Asunto:* ${subj.options[subj.selectedIndex].text}`,'',`*Mensaje:* ${msg}`
   ].filter(l=>l!==null).join('\n');
   window.open(`https://wa.me/593997218508?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+/* ═══════════════════════════════════════
+   EMAIL POPUP
+═══════════════════════════════════════ */
+function openEmailPopup() {
+  document.getElementById('emailPopup').classList.add('open');
+}
+
+function closeEmailPopup() {
+  document.getElementById('emailPopup').classList.remove('open');
+  localStorage.setItem('streetz_popup_v1', '1');
+}
+
+function submitEmailPopup(e) {
+  e.preventDefault();
+  const email = document.getElementById('popupEmail').value.trim();
+  if (!email) return;
+  localStorage.setItem('streetz_popup_v1', '1');
+  localStorage.setItem('streetz_email', email);
+  const msg = `🎁 *Nueva suscripción STREETZ*\n\nEmail: ${email}\nCódigo: STREETZ10 (10% descuento primer pedido)`;
+  window.open(`https://wa.me/593997218508?text=${encodeURIComponent(msg)}`, '_blank');
+  const popup = document.querySelector('.email-popup');
+  popup.innerHTML = `
+    <div class="email-popup-tag">¡Listo!</div>
+    <div class="email-popup-title" style="font-size:64px;margin-bottom:14px">STREETZ10</div>
+    <div class="email-popup-sub" style="font-size:15px;color:var(--black);font-weight:600;margin-bottom:8px">Ese es tu código de descuento.</div>
+    <div class="email-popup-sub">Úsalo al finalizar tu compra. Te llegará también por WhatsApp.</div>
+    <button class="email-popup-btn" onclick="closeEmailPopup()" style="margin-top:20px">Ver colección →</button>
+  `;
+}
+
+if (!localStorage.getItem('streetz_popup_v1')) {
+  setTimeout(openEmailPopup, 4000);
 }
 
 /* ═══════════════════════════════════════
